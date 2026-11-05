@@ -1,7 +1,8 @@
 export const pranaliData = {
   name: "Pranali",
   optionalBirthdayDate: "",
-  musicPath: "/music/your-song.mp3", // Add your song path here or leave empty.
+  musicPath:
+    "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3", // Add your song path here or leave empty.
   intro: {
     eyebrow: "Made especially for you",
     title: "Hey, Pranali... 🌷",

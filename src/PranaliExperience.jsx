@@ -201,7 +201,7 @@ function BirthdayLetter() {
           <p className="signature">
             with lots of love & friendship,
             <br />
-            <span>your best friend ♡</span>
+            <span>your may be best friend ♡</span>
           </p>
         </motion.div>
       </div>
@@ -404,10 +404,7 @@ function OpenWhen() {
   return (
     <section className="open-section">
       <div className={sectionClass}>
-        <SectionIntro
-          kicker="letters for later"
-          title="Open when…"
-        />
+        <SectionIntro kicker="letters for later" title="Open when…" />
         <div className="open-grid">
           {data.openWhen.map((item, i) => (
             <article
