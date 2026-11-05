@@ -407,7 +407,6 @@ function OpenWhen() {
         <SectionIntro
           kicker="letters for later"
           title="Open when…"
-          copy="A few words for the days that ask for something gentle."
         />
         <div className="open-grid">
           {data.openWhen.map((item, i) => (
