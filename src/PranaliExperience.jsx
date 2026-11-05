@@ -1,24 +1,617 @@
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import confetti from 'canvas-confetti'
-import { ArrowDown, ArrowLeft, ArrowRight, Heart, Music2, Pause, Play, RotateCcw, Sparkles, Volume2, VolumeX, X } from 'lucide-react'
-import { pranaliData as data } from './data/pranaliData'
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import confetti from "canvas-confetti";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  Heart,
+  Music2,
+  Pause,
+  Play,
+  RotateCcw,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
+import { pranaliData as data } from "./data/pranaliData";
 
-const fadeUp = { hidden: { opacity: 0, y: 28 }, visible: { opacity: 1, y: 0, transition: { duration: .7, ease: 'easeOut' } } }
-const sectionClass = 'mx-auto w-full max-w-6xl px-5 py-24 sm:px-8 lg:py-32'
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+};
+const sectionClass = "mx-auto w-full max-w-6xl px-5 py-24 sm:px-8 lg:py-32";
 
-function SectionIntro({ kicker, title, copy }) { return <div className="mb-12 max-w-2xl"><p className="eyebrow">{kicker}</p><h2 className="display mt-3">{title}</h2>{copy && <p className="body-copy mt-4">{copy}</p>}</div> }
-function FloatingDecor() { return <div className="decor" aria-hidden="true"><span className="orb orb-one"/><span className="orb orb-two"/><span className="sparkle sparkle-one">✦</span><span className="sparkle sparkle-two">✧</span><span className="heart-float">♡</span></div> }
-function MusicToggle() { const [playing, setPlaying] = useState(false); const [muted, setMuted] = useState(false); const [audio, setAudio] = useState(null); useEffect(() => { if (!data.musicPath) return; const el = new Audio(data.musicPath); el.loop = true; el.volume = .35; setAudio(el); return () => el.pause() }, []); const toggle = async () => { if (!audio) return; if (playing) audio.pause(); else await audio.play().catch(() => {}); setPlaying(!playing) }; return <div className="music-control"><button className="icon-button" onClick={toggle} aria-label={audio ? (playing ? 'Pause music' : 'Play music') : 'Music is not configured'} disabled={!audio}>{playing ? <Pause /> : <Play />}</button><button className="icon-button" onClick={() => { if (audio) audio.muted = !muted; setMuted(!muted) }} aria-label={muted ? 'Unmute music' : 'Mute music'} disabled={!audio}>{muted ? <VolumeX /> : <Volume2 />}</button><span>{audio ? 'a little soundtrack' : 'sound optional'}</span></div> }
-function Opening({ onOpen, onSkip }) { const [opening, setOpening] = useState(false); return <section className="opening" aria-label="Birthday introduction"><FloatingDecor/><MusicToggle/><button className="skip" onClick={onSkip}>Skip intro</button><motion.div initial="hidden" animate="visible" variants={fadeUp} className="opening-content"><p className="eyebrow">{data.intro.eyebrow}</p><h1 className="display opening-title">{data.intro.title}</h1><p className="opening-subtitle">{data.intro.subtitle}</p><p className="opening-detail">{data.intro.detail}</p><motion.div className={`envelope ${opening ? 'is-open' : ''}`} animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 4 }}><div className="envelope-flap"/><Heart className="envelope-heart" fill="currentColor"/><span className="envelope-paper">A tiny world, made for you</span></motion.div><button className="primary-button" onClick={() => { setOpening(true); setTimeout(onOpen, 900) }}>{opening ? 'Opening your surprise…' : 'Open Your Surprise ✨'}</button></motion.div><div className="scroll-cue"><ArrowDown/> scroll gently</div></section> }
-function StoryProgress() { const [active, setActive] = useState(0); useEffect(() => { const onScroll = () => setActive(Math.min(6, Math.floor(window.scrollY / (document.body.scrollHeight / 7)))); window.addEventListener('scroll', onScroll, { passive: true }); return () => window.removeEventListener('scroll', onScroll) }, []); return <div className="progress-dots" aria-label="Story progress">{['Letter','Memories','Reminders','Friends','Open when','Final'].map((label, i) => <span key={label} className={active >= i + 1 ? 'active' : ''} title={label}/>)}</div> }
-function BirthdayLetter() { const [full, setFull] = useState(false); const [copied, setCopied] = useState(false); const copy = async () => { await navigator.clipboard?.writeText(data.letter); setCopied(true); setTimeout(() => setCopied(false), 1800) }; return <section className="paper-section"><div className={sectionClass}><motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={fadeUp} className="letter-paper"><div className="flower-mark">✿</div><p className="eyebrow">A little note from your bestie</p><h2 className="display letter-title">For you, Pranali</h2><div className={`letter-text ${full ? 'full' : ''}`}>{data.letter.split('\n\n').map((paragraph, i) => <p key={i}>{paragraph}</p>)}</div>{!full && <div className="letter-fade"/>}<div className="letter-actions"><button className="secondary-button" onClick={() => setFull(!full)}>{full ? 'Read a little less' : 'Read the whole letter'}</button><button className="text-button" onClick={copy}>{copied ? 'Copied ✓' : 'Copy letter'}</button></div><p className="signature">with lots of love & friendship,<br/><span>your best friend ♡</span></p></motion.div></div></section> }
-function PhotoScrapbook() { const [selected, setSelected] = useState(null); return <section className="scrapbook"><div className={sectionClass}><SectionIntro kicker="little pieces of happiness" title="A tiny album of moments" copy="Add your own photographs to the /public/images folder, then make every caption yours in pranaliData.js."/><div className="photo-grid">{data.photos.map((photo, i) => <motion.button key={photo.src} className={`photo-card tilt-${i % 4}`} whileHover={{ y: -8, rotate: 0 }} onClick={() => setSelected(i)}><div className="photo-frame"><img src={photo.src} alt={photo.alt} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement?.classList.add('missing-photo') }}/><span className="missing-label">add photo {i + 1}</span></div><span className="photo-caption">{photo.caption}</span>{photo.date && <span className="photo-date">{photo.date}</span>}</motion.button>)}</div><p className="featured-caption">“If happiness could be captured in a picture, maybe it would look a little like this.” 🌷</p></div><PhotoLightbox selected={selected} setSelected={setSelected}/></section> }
-function PhotoLightbox({ selected, setSelected }) { useEffect(() => { const onKey = (e) => { if (e.key === 'Escape') setSelected(null); if (selected !== null && e.key === 'ArrowRight') setSelected((selected + 1) % data.photos.length); if (selected !== null && e.key === 'ArrowLeft') setSelected((selected - 1 + data.photos.length) % data.photos.length) }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey) }, [selected, setSelected]); if (selected === null) return null; const photo = data.photos[selected]; return <div className="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" onClick={() => setSelected(null)}><button className="lightbox-close icon-button" onClick={() => setSelected(null)} aria-label="Close photo"><X/></button><button className="lightbox-nav prev icon-button" onClick={(e) => { e.stopPropagation(); setSelected((selected - 1 + data.photos.length) % data.photos.length) }} aria-label="Previous photo"><ArrowLeft/></button><div className="lightbox-inner" onClick={(e) => e.stopPropagation()}><img src={photo.src} alt={photo.alt}/><p>{photo.caption}</p></div><button className="lightbox-nav next icon-button" onClick={(e) => { e.stopPropagation(); setSelected((selected + 1) % data.photos.length) }} aria-label="Next photo"><ArrowRight/></button></div> }
-function Reminders() { return <section className="lavender-section"><div className={sectionClass}><SectionIntro kicker="things I hope you never forget" title="Keep these close" copy="Save this little corner for the days you need a softer reminder."/><div className="reminder-grid">{data.reminders.map((item, i) => <motion.article key={item} className={`reminder-card card-${i % 3}`} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-50px' }} variants={fadeUp}><span className="card-flower">{['✦','❀','✧'][i % 3]}</span><p>{item}</p></motion.article>)}</div><p className="closing-line">And if you ever forget any of these things, come back here and read them again. 💗</p></div></section> }
-function Appreciations() { const [flipped, setFlipped] = useState(null); return <section className="cream-section"><div className={sectionClass}><SectionIntro kicker="why you’re such a special friend" title="The little things matter"/><div className="appreciation-grid">{data.appreciations.map((message, i) => <button key={message} className={`appreciation-card ${flipped === i ? 'flipped' : ''}`} onClick={() => setFlipped(flipped === i ? null : i)}><span className="card-front">tap to turn <Heart/></span><span className="card-back">{message}</span></button>)}</div></div></section> }
-function Timeline() { return <section className="timeline-section"><div className={sectionClass}><SectionIntro kicker="from little moments to beautiful memories" title="Our story, whenever you’re ready" copy="Every friendship has its own little story. Add the moments that make ours special. 💌"/>{data.timeline.length ? <div className="timeline">{data.timeline.map((item) => <article key={item.title}><span className="timeline-dot"/><p className="eyebrow">{item.date}</p><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : <div className="timeline-empty"><Sparkles/><span>Add real milestones in <code>pranaliData.js</code> — no placeholder memories, ever.</span></div>}</div></section> }
-function OpenWhen() { const [open, setOpen] = useState(null); return <section className="open-section"><div className={sectionClass}><SectionIntro kicker="letters for later" title="Open when…" copy="A few words for the days that ask for something gentle."/><div className="open-grid">{data.openWhen.map((item, i) => <article key={item.title} className={`open-letter ${open === i ? 'opened' : ''}`}><button className="mini-envelope" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}><span className="mini-flap">♡</span><span>{item.title}</span><small>{open === i ? 'close letter' : 'tap to open'}</small></button><AnimatePresence>{open === i && <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} className="open-message"><p>{item.message}</p></motion.div>}</AnimatePresence></article>)}</div></div></section> }
-function PlayfulCorner() { const [wish, setWish] = useState(data.wishes[0]); const [compliment, setCompliment] = useState(data.compliments[0]); const [hearts, setHearts] = useState([]); const random = (arr) => arr[Math.floor(Math.random() * arr.length)]; return <section className="playful-section"><div className={sectionClass}><SectionIntro kicker="okay, enough emotions for a second…" title="A little best-friend intermission"/><div className="play-grid"><div className="play-card"><span className="play-icon">🎁</span><h3>Random birthday wish</h3><p>{wish}</p><button className="secondary-button" onClick={() => setWish(random(data.wishes))}>Give me another wish</button></div><div className="play-card"><span className="play-icon">✦</span><h3>Pick a little compliment</h3><p>{compliment}</p><button className="secondary-button" onClick={() => setCompliment(random(data.compliments))}>Tell me something sweet</button></div><div className="play-card heart-card"><span className="play-icon">♡</span><h3>Send a heart</h3><p>A tiny, instant reminder that you’re appreciated.</p><button className="heart-button" onClick={() => { const id = Date.now(); setHearts([...hearts, id]); setTimeout(() => setHearts((current) => current.filter((heart) => heart !== id)), 900) }} aria-label="Send a heart"><Heart fill="currentColor"/></button><div className="heart-burst" aria-hidden="true">{hearts.map((heart) => <motion.span key={heart} initial={{ opacity: 1, y: 0, scale: .7 }} animate={{ opacity: 0, y: -60, scale: 1.4 }} transition={{ duration: .8 }}>♡</motion.span>)}</div></div></div></div></section> }
-function FinalSurprise({ onReplay }) { const [revealed, setRevealed] = useState(false); const reveal = () => { setRevealed(true); confetti({ particleCount: 130, spread: 85, origin: { y: .65 }, colors: ['#f3bfd5','#dcd1ff','#fff9f5','#8b79c9'] }) }; return <section className={`final-section ${revealed ? 'revealed' : ''}`}><FloatingDecor/><div className={sectionClass}><p className="eyebrow">one last little thing</p><h2 className="display">Wait, {data.name}… there’s one last thing. 💌</h2><p className="final-intro">I know this is just a little website, but I wanted to make something that you could come back to whenever you wanted a reminder that your birthday is worth celebrating and that your friendship is appreciated.</p>{!revealed ? <button className="primary-button final-button" onClick={reveal}>Open Your Final Surprise 🎁</button> : <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} className="final-card"><div className="cake" aria-label="Birthday cake">🎂<span className="candle">✦</span></div><div className="final-text">{data.finalText.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}</div><button className="secondary-button" onClick={onReplay}><RotateCcw/> Replay our little story</button></motion.div>}</div></section> }
-export default function PranaliExperience() { const [started, setStarted] = useState(false); const reduced = useReducedMotion(); useEffect(() => { if (reduced) document.documentElement.classList.add('reduced-motion'); return () => document.documentElement.classList.remove('reduced-motion') }, [reduced]); const jumpToStory = () => { setStarted(true); setTimeout(() => document.getElementById('story')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }), 40) }; return <main>{!started && <Opening onOpen={() => setStarted(true)} onSkip={jumpToStory}/>} {started && <><StoryProgress/><div id="story"><BirthdayLetter/><PhotoScrapbook/><Reminders/><Appreciations/><Timeline/><OpenWhen/><PlayfulCorner/><FinalSurprise onReplay={() => window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })}/></div></>}</main> }
+function SectionIntro({ kicker, title, copy }) {
+  return (
+    <div className="mb-12 max-w-2xl">
+      <p className="eyebrow">{kicker}</p>
+      <h2 className="display mt-3">{title}</h2>
+      {copy && <p className="body-copy mt-4">{copy}</p>}
+    </div>
+  );
+}
+function FloatingDecor() {
+  return (
+    <div className="decor" aria-hidden="true">
+      <span className="orb orb-one" />
+      <span className="orb orb-two" />
+      <span className="sparkle sparkle-one">✦</span>
+      <span className="sparkle sparkle-two">✧</span>
+      <span className="heart-float">♡</span>
+    </div>
+  );
+}
+function MusicToggle() {
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [audio, setAudio] = useState(null);
+  useEffect(() => {
+    if (!data.musicPath) return;
+    const el = new Audio(data.musicPath);
+    el.loop = true;
+    el.volume = 0.35;
+    setAudio(el);
+    return () => el.pause();
+  }, []);
+  const toggle = async () => {
+    if (!audio) return;
+    if (playing) audio.pause();
+    else await audio.play().catch(() => {});
+    setPlaying(!playing);
+  };
+  return (
+    <div className="music-control">
+      <button
+        className="icon-button"
+        onClick={toggle}
+        aria-label={
+          audio
+            ? playing
+              ? "Pause music"
+              : "Play music"
+            : "Music is not configured"
+        }
+        disabled={!audio}
+      >
+        {playing ? <Pause /> : <Play />}
+      </button>
+      <button
+        className="icon-button"
+        onClick={() => {
+          if (audio) audio.muted = !muted;
+          setMuted(!muted);
+        }}
+        aria-label={muted ? "Unmute music" : "Mute music"}
+        disabled={!audio}
+      >
+        {muted ? <VolumeX /> : <Volume2 />}
+      </button>
+      <span>{audio ? "a little soundtrack" : "sound optional"}</span>
+    </div>
+  );
+}
+function Opening({ onOpen, onSkip }) {
+  const [opening, setOpening] = useState(false);
+  return (
+    <section className="opening" aria-label="Birthday introduction">
+      <FloatingDecor />
+      <MusicToggle />
+      <button className="skip" onClick={onSkip}>
+        Skip intro
+      </button>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeUp}
+        className="opening-content"
+      >
+        <p className="eyebrow">{data.intro.eyebrow}</p>
+        <h1 className="display opening-title">{data.intro.title}</h1>
+        <p className="opening-subtitle">{data.intro.subtitle}</p>
+        <p className="opening-detail">{data.intro.detail}</p>
+        <motion.div
+          className={`envelope ${opening ? "is-open" : ""}`}
+          animate={{ y: [0, -8, 0] }}
+          transition={{ repeat: Infinity, duration: 4 }}
+        >
+          <div className="envelope-flap" />
+          <Heart className="envelope-heart" fill="currentColor" />
+          <span className="envelope-paper">A tiny world, made for you</span>
+        </motion.div>
+        <button
+          className="primary-button"
+          onClick={() => {
+            setOpening(true);
+            setTimeout(onOpen, 900);
+          }}
+        >
+          {opening ? "Opening your surprise…" : "Open Your Surprise ✨"}
+        </button>
+      </motion.div>
+      <div className="scroll-cue">
+        <ArrowDown /> scroll gently
+      </div>
+    </section>
+  );
+}
+function StoryProgress() {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const onScroll = () =>
+      setActive(
+        Math.min(
+          6,
+          Math.floor(window.scrollY / (document.body.scrollHeight / 7)),
+        ),
+      );
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <div className="progress-dots" aria-label="Story progress">
+      {["Letter", "Memories", "Reminders", "Friends", "Open when", "Final"].map(
+        (label, i) => (
+          <span
+            key={label}
+            className={active >= i + 1 ? "active" : ""}
+            title={label}
+          />
+        ),
+      )}
+    </div>
+  );
+}
+function BirthdayLetter() {
+  const [full, setFull] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    await navigator.clipboard?.writeText(data.letter);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return (
+    <section className="paper-section">
+      <div className={sectionClass}>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={fadeUp}
+          className="letter-paper"
+        >
+          <div className="flower-mark">✿</div>
+          <p className="eyebrow">A little note from your bestie</p>
+          <h2 className="display letter-title">For you, Pranali</h2>
+          <div className={`letter-text ${full ? "full" : ""}`}>
+            {data.letter.split("\n\n").map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+          {!full && <div className="letter-fade" />}
+          <div className="letter-actions">
+            <button className="secondary-button" onClick={() => setFull(!full)}>
+              {full ? "Read a little less" : "Read the whole letter"}
+            </button>
+            <button className="text-button" onClick={copy}>
+              {copied ? "Copied ✓" : "Copy letter"}
+            </button>
+          </div>
+          <p className="signature">
+            with lots of love & friendship,
+            <br />
+            <span>your best friend ♡</span>
+          </p>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+function PhotoScrapbook() {
+  const [selected, setSelected] = useState(null);
+  return (
+    <section className="scrapbook">
+      <div className={sectionClass}>
+        <SectionIntro
+          kicker="little pieces of happiness"
+          title="A tiny album of moments"
+        />
+        <div className="photo-grid">
+          {data.photos.map((photo, i) => (
+            <motion.button
+              key={photo.src}
+              className={`photo-card tilt-${i % 4}`}
+              whileHover={{ y: -8, rotate: 0 }}
+              onClick={() => setSelected(i)}
+            >
+              <div className="photo-frame">
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.parentElement?.classList.add(
+                      "missing-photo",
+                    );
+                  }}
+                />
+                <span className="missing-label">add photo {i + 1}</span>
+              </div>
+              <span className="photo-caption">{photo.caption}</span>
+              {photo.date && <span className="photo-date">{photo.date}</span>}
+            </motion.button>
+          ))}
+        </div>
+        <p className="featured-caption">
+          “If happiness could be captured in a picture, maybe it would look a
+          little like this.” 🌷
+        </p>
+      </div>
+      <PhotoLightbox selected={selected} setSelected={setSelected} />
+    </section>
+  );
+}
+function PhotoLightbox({ selected, setSelected }) {
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") setSelected(null);
+      if (selected !== null && e.key === "ArrowRight")
+        setSelected((selected + 1) % data.photos.length);
+      if (selected !== null && e.key === "ArrowLeft")
+        setSelected((selected - 1 + data.photos.length) % data.photos.length);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected, setSelected]);
+  if (selected === null) return null;
+  const photo = data.photos[selected];
+  return (
+    <div
+      className="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo viewer"
+      onClick={() => setSelected(null)}
+    >
+      <button
+        className="lightbox-close icon-button"
+        onClick={() => setSelected(null)}
+        aria-label="Close photo"
+      >
+        <X />
+      </button>
+      <button
+        className="lightbox-nav prev icon-button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelected((selected - 1 + data.photos.length) % data.photos.length);
+        }}
+        aria-label="Previous photo"
+      >
+        <ArrowLeft />
+      </button>
+      <div className="lightbox-inner" onClick={(e) => e.stopPropagation()}>
+        <img src={photo.src} alt={photo.alt} />
+        <p>{photo.caption}</p>
+      </div>
+      <button
+        className="lightbox-nav next icon-button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelected((selected + 1) % data.photos.length);
+        }}
+        aria-label="Next photo"
+      >
+        <ArrowRight />
+      </button>
+    </div>
+  );
+}
+function Reminders() {
+  return (
+    <section className="lavender-section">
+      <div className={sectionClass}>
+        <SectionIntro
+          kicker="things I hope you never forget"
+          title="Keep these close"
+          copy="Save this little corner for the days you need a softer reminder."
+        />
+        <div className="reminder-grid">
+          {data.reminders.map((item, i) => (
+            <motion.article
+              key={item}
+              className={`reminder-card card-${i % 3}`}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={fadeUp}
+            >
+              <span className="card-flower">{["✦", "❀", "✧"][i % 3]}</span>
+              <p>{item}</p>
+            </motion.article>
+          ))}
+        </div>
+        <p className="closing-line">
+          And if you ever forget any of these things, come back here and read
+          them again. 💗
+        </p>
+      </div>
+    </section>
+  );
+}
+function Appreciations() {
+  const [flipped, setFlipped] = useState(null);
+  return (
+    <section className="cream-section">
+      <div className={sectionClass}>
+        <SectionIntro
+          kicker="why you’re such a special friend"
+          title="The little things matter"
+        />
+        <div className="appreciation-grid">
+          {data.appreciations.map((message, i) => (
+            <button
+              key={message}
+              className={`appreciation-card ${flipped === i ? "flipped" : ""}`}
+              onClick={() => setFlipped(flipped === i ? null : i)}
+            >
+              <span className="card-front">
+                tap to turn <Heart />
+              </span>
+              <span className="card-back">{message}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+function Timeline() {
+  return (
+    <section className="timeline-section">
+      <div className={sectionClass}>
+        <SectionIntro
+          kicker="from little moments to beautiful memories"
+          title="Our story, whenever you’re ready"
+        />
+        {data.timeline.length ? (
+          <div className="timeline">
+            {data.timeline.map((item) => (
+              <article key={item.title}>
+                <span className="timeline-dot" />
+                <p className="eyebrow">{item.date}</p>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="timeline-empty">
+            <Sparkles />
+            <span>
+              Add real milestones in <code>pranaliData.js</code> — no
+              placeholder memories, ever.
+            </span>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+function OpenWhen() {
+  const [open, setOpen] = useState(null);
+  return (
+    <section className="open-section">
+      <div className={sectionClass}>
+        <SectionIntro
+          kicker="letters for later"
+          title="Open when…"
+          copy="A few words for the days that ask for something gentle."
+        />
+        <div className="open-grid">
+          {data.openWhen.map((item, i) => (
+            <article
+              key={item.title}
+              className={`open-letter ${open === i ? "opened" : ""}`}
+            >
+              <button
+                className="mini-envelope"
+                onClick={() => setOpen(open === i ? null : i)}
+                aria-expanded={open === i}
+              >
+                <span className="mini-flap">♡</span>
+                <span>{item.title}</span>
+                <small>{open === i ? "close letter" : "tap to open"}</small>
+              </button>
+              <AnimatePresence>
+                {open === i && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 12 }}
+                    className="open-message"
+                  >
+                    <p>{item.message}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+function PlayfulCorner() {
+  const [wish, setWish] = useState(data.wishes[0]);
+  const [compliment, setCompliment] = useState(data.compliments[0]);
+  const [hearts, setHearts] = useState([]);
+  const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  return (
+    <section className="playful-section">
+      <div className={sectionClass}>
+        <SectionIntro
+          kicker="okay, enough emotions for a second…"
+          title="A little best-friend intermission"
+        />
+        <div className="play-grid">
+          <div className="play-card">
+            <span className="play-icon">🎁</span>
+            <h3>Random birthday wish</h3>
+            <p>{wish}</p>
+            <button
+              className="secondary-button"
+              onClick={() => setWish(random(data.wishes))}
+            >
+              Give me another wish
+            </button>
+          </div>
+          <div className="play-card">
+            <span className="play-icon">✦</span>
+            <h3>Pick a little compliment</h3>
+            <p>{compliment}</p>
+            <button
+              className="secondary-button"
+              onClick={() => setCompliment(random(data.compliments))}
+            >
+              Tell me something sweet
+            </button>
+          </div>
+          <div className="play-card heart-card">
+            <span className="play-icon">♡</span>
+            <h3>Send a heart</h3>
+            <p>A tiny, instant reminder that you’re appreciated.</p>
+            <button
+              className="heart-button"
+              onClick={() => {
+                const id = Date.now();
+                setHearts([...hearts, id]);
+                setTimeout(
+                  () =>
+                    setHearts((current) =>
+                      current.filter((heart) => heart !== id),
+                    ),
+                  900,
+                );
+              }}
+              aria-label="Send a heart"
+            >
+              <Heart fill="currentColor" />
+            </button>
+            <div className="heart-burst" aria-hidden="true">
+              {hearts.map((heart) => (
+                <motion.span
+                  key={heart}
+                  initial={{ opacity: 1, y: 0, scale: 0.7 }}
+                  animate={{ opacity: 0, y: -60, scale: 1.4 }}
+                  transition={{ duration: 0.8 }}
+                >
+                  ♡
+                </motion.span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+function FinalSurprise({ onReplay }) {
+  const [revealed, setRevealed] = useState(false);
+  const reveal = () => {
+    setRevealed(true);
+    confetti({
+      particleCount: 130,
+      spread: 85,
+      origin: { y: 0.65 },
+      colors: ["#f3bfd5", "#dcd1ff", "#fff9f5", "#8b79c9"],
+    });
+  };
+  return (
+    <section className={`final-section ${revealed ? "revealed" : ""}`}>
+      <FloatingDecor />
+      <div className={sectionClass}>
+        <p className="eyebrow">one last little thing</p>
+        <h2 className="display">
+          Wait, {data.name}… there’s one last thing. 💌
+        </h2>
+        <p className="final-intro">
+          I know this is just a little website, but I wanted to make something
+          that you could come back to whenever you wanted a reminder that your
+          birthday is worth celebrating and that your friendship is appreciated.
+        </p>
+        {!revealed ? (
+          <button className="primary-button final-button" onClick={reveal}>
+            Open Your Final Surprise 🎁
+          </button>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="final-card"
+          >
+            <div className="cake" aria-label="Birthday cake">
+              🎂<span className="candle">✦</span>
+            </div>
+            <div className="final-text">
+              {data.finalText.split("\n\n").map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+            <button className="secondary-button" onClick={onReplay}>
+              <RotateCcw /> Replay our little story
+            </button>
+          </motion.div>
+        )}
+      </div>
+    </section>
+  );
+}
+export default function PranaliExperience() {
+  const [started, setStarted] = useState(false);
+  const reduced = useReducedMotion();
+  useEffect(() => {
+    if (reduced) document.documentElement.classList.add("reduced-motion");
+    return () => document.documentElement.classList.remove("reduced-motion");
+  }, [reduced]);
+  const jumpToStory = () => {
+    setStarted(true);
+    setTimeout(
+      () =>
+        document
+          .getElementById("story")
+          ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }),
+      40,
+    );
+  };
+  return (
+    <main>
+      {!started && (
+        <Opening onOpen={() => setStarted(true)} onSkip={jumpToStory} />
+      )}{" "}
+      {started && (
+        <>
+          <StoryProgress />
+          <div id="story">
+            <BirthdayLetter />
+            <PhotoScrapbook />
+            <Reminders />
+            <Appreciations />
+            <Timeline />
+            <OpenWhen />
+            <PlayfulCorner />
+            <FinalSurprise
+              onReplay={() =>
+                window.scrollTo({
+                  top: 0,
+                  behavior: reduced ? "auto" : "smooth",
+                })
+              }
+            />
+          </div>
+        </>
+      )}
+    </main>
+  );
+}

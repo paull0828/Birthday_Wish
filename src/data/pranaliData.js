@@ -9,7 +9,7 @@ export const pranaliData = {
     detail: "Because some people deserve more than just a birthday text.",
   },
   letter: `Happy Birthday, Pranali!\n\nI was thinking about what to write for your birthday, and honestly, a simple 'Happy Birthday' just didn't feel enough.\n\nYou're not just someone I know from office. You're that person I'm genuinely glad life brought into my world from that picnic bus.\n\nSometimes it's the smallest things that make our friendship special — like how you always say "baju ky" and instantly my mood fresh ho jata hai, your crazy loud laugh jo pure ulhas mai me sunai deta hai, and your non-stop bak-bak jo kabhi khatam hi nahi hoti.\nAnd i love to here that\n\nI may not always say it perfectly, but I hope you know that I appreciate you. That lazy wali ladki jo mere liye coffee,maggi effort leke banati and you know your the best cook merko banake dete ho tabh, fish khana pending h\n\nToday, I hope you give yourself a little extra happiness. I hope you laugh until your cheeks hurt - wohi wala loud wala laugh, eat lots of outside food jo tumhe itna pasand hai, and feel safe - dogs se dur .\n\nI hope this next year brings you peaceful days, exciting opportunities, and happiness in the most unexpected places.\n\nThank you for being my best friend, Pranali. From hi-hello wali baat se leke ab jahan hum rukte hi nahi hai baat karne se, I'm grateful for it all.\n\nNever stop being that talkative, caring, thodi lazy but dil se best wali Pranali.\n\nHappy Birthday, bestie!\n\nWith lots of love and friendship,\nYour best friend`,
-  photos: [1, 2, 3, 4, 5, 6, 7, 8].map((number, index) => ({
+  photos: [1, 2, 3, 4, 5, 6].map((number, index) => ({
     src: `/images/pranali-${number}.jpg`,
     alt: `Pranali memory ${number}`,
     caption: [
@@ -19,8 +19,8 @@ export const pranaliData = {
       "A memory I’ll always appreciate.",
       "Just Pranali being Pranali. 💗",
       "A soft little snapshot.",
-      "A day to keep close.",
-      "A favorite frame.",
+      // "A day to keep close.",
+      // "A favorite frame.",
     ][index],
     date: "",
   })),
@@ -44,7 +44,7 @@ export const pranaliData = {
       date: "Our Story",
       title: "Jabse office me mile the",
       description:
-        "Every friendship has its own little story. And ours started not in office, but us picnic wali bus me when we were coming back. Wahi se sab start hua. We started talking, fir snap share, fir insta share, and then pata hi nahi chala kab best friends ban gaye.",
+        "Every friendship has its own little story. And ours started not in office, but us picnic wali bus me when we were coming back. Wahi se sab start hua. We started talking, fir snap share, fir insta share, and then pata hi nahi chala kab ithne khas ban gaye.",
     },
     {
       date: "The Best Part",
